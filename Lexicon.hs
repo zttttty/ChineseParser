@@ -84,13 +84,29 @@ lexicon "weixiao"        = [Cat "weixiao"        "VP" []       []]   -- smile
 lexicon "xiao"           = [Cat "xiao"           "VP" []       []]   -- laugh
 
 lexicon "ai"       =
-    [Cat "ai"         "VP" []   [Cat "_" "NP" [] []]   -- love
+    [Cat "ai"       "VP"  []    [Cat "_" "NP"  [] []],
+     Cat "ai"       "VP"  []    [Cat "_" "TEN" [] [],
+                                 Cat "_" "NP"  [] []],
+     Cat "_"        "TEN" [Yao] [Cat "ai" "VP" [] [],
+                                 Cat "_" "NP"  [] []]]   -- love
 lexicon "jingpei"  =
-    [Cat "jingpei"    "VP" []   [Cat "_" "NP" [] []]   -- admire
+    [Cat "jingpei"    "VP" []    [Cat "_" "NP" [] []]
+     Cat "jingpei"    "VP" []    [Cat "_" "TEN" [] [],
+                                  Cat "_" "NP"  [] []],
+     Cat "_"         "TEN" [Yao] [Cat "jingpei" "VP" [] [],
+                                  Cat "_" "NP"  [] []]]   -- admire
 lexicon "bangzhu"  =
-    [Cat "bangzhu"    "VP" []   [Cat "_" "NP" [] []]   -- help
+    [Cat "bangzhu"    "VP" []    [Cat "_" "NP" [] []]
+     Cat "bangzhu"    "VP" []    [Cat "_" "TEN" [] [],
+                                  Cat "_" "NP"  [] []],
+     Cat "_"         "TEN" [Yao] [Cat "bangzhu" "VP" [] [],
+                                  Cat "_" "NP"  [] []]]   -- help
 lexicon "dabai"  =
-    [Cat "dabai"      "VP" []   [Cat "_" "NP" [] []]   -- defeat
+   [Cat "dabai"    "VP" []    [Cat "_" "NP" [] []]
+    Cat "dabai"    "VP" []    [Cat "_" "TEN" [] [],
+                                 Cat "_" "NP"  [] []],
+    Cat "_"         "TEN" [Yao] [Cat "dabai" "VP" [] [],
+                                 Cat "_" "NP"  [] []]]   -- defeat
 
 lexicon "gei"  =
     [Cat "gei"     "VP" []      [Cat "_" "NP"    [] [],      -- give
