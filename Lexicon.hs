@@ -11,11 +11,11 @@ type Agreement = [Feat]
 data Feat = Masc  | Fem  | Neutr
             | Sg    | Pl
             | Fst   | Snd  | Thrd
-            | Pers  | Refl | Wh
+            | Pers  | Refl
             | De1 |  De2 |  De4                           -- structure particles
             | Le  |  Zhe  |  Yao                          -- tense particles
             | Ma  |  Me  |  Ne  |  Ba                     -- question markers
-            | Ah |  Ya |  Wa |  Na 			              -- exclamation markers
+            | Ah |  Ya |  Wa  			                  -- exclamation markers
             | At  |  With  |  From | To                   -- prepositions
             deriving (Eq,Show,Ord)
 
@@ -111,5 +111,22 @@ lexicon "na"    =
 lexicon "yong"  = [Cat "yong"    "PREP" [With] []]  -- with
 lexicon "xiang" = [Cat "xiang"   "PREP" [To]   []]  -- to
 lexicon "cong"  = [Cat "cong"    "PREP" [From] []]  -- from
+
+lexicon "de1"   = [Cat "de1"     "STRU" [De1]  []]  -- structure particles
+lexicon "de2"   = [Cat "de2"     "STRU" [De2]  []]
+lexicon "de4"   = [Cat "de4"     "STRU" [De4]  []]
+
+lexicon "le"    = [Cat "le"      "TEN"  [Le]   []]  -- tense particles
+lexicon "zhe"   = [Cat "zhe"     "TEN"  [Zhe]  []]
+lexicon "yao"   = [Cat "yao"     "TEN"  [Yao]  []]
+
+lexicon "ma"    = [Cat "ma"      "MAK"  [Ma]   []]  -- question markers
+lexicon "me"    = [Cat "me"      "MAK"  [Me]   []]
+lexicon "ne"    = [Cat "ne"      "MAK"  [Ne]   []]
+lexicon "ba"    = [Cat "ba"      "MAK"  [Ba]   []]
+
+lexicon "ah"    = [Cat "ah"      "MAK"  [Ah]   []]  -- exclamation markers
+lexicon "ya"    = [Cat "ya"      "MAK"  [Ya]   []]
+lexicon "wa"    = [Cat "wa"      "MAK"  [Wa]   []]
 
 lexicon _ = []
