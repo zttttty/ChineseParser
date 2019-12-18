@@ -118,7 +118,7 @@ lexicon "mai2"  =
     [Cat "mai2"    "VP" [To]    [Cat "_" "NP"    [] [],      -- sell
                                  Cat "_" "PP"    [] []]]
 lexicon "ti"    =
-    [Cat "ti"      "PP" [With]  [Cat "ti" "VP"   [] [],      -- kick
+    [Cat "_"      "PP" [With]  [Cat "ti" "VP"   [] [],      -- kick
                                  Cat "_" "NP"    [] []]]
 lexicon "na"    =
     [Cat "_"       "PP" [From]  [Cat "na" "VP"   [] [],      -- take
