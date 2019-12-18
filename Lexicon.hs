@@ -15,7 +15,7 @@ data Feat = Masc  | Fem  | Neutr
             | De1 |  De2 |  De4                           -- structure particles
             | Le  |  Zhe  |  Yao                          -- tense particles
             | Ma  |  Me  |  Ne  |  Ba                     -- question markers
-            | Ah |  Ya |  Wa  			                  -- exclamation markers
+            | Ah |  Ya |  Wa                              -- exclamation markers
             | At  |  With  |  From | To                   -- prepositions
             deriving (Eq,Show,Ord)
 
@@ -27,7 +27,7 @@ lexicon "ni"    = [Cat "ni"    "NP" [Pers,Snd]             []]      -- you
 lexicon "ta1"   = [Cat "ta1"   "NP" [Pers,Thrd,Sg,Masc]    []]      -- he/him
 lexicon "ta2"   = [Cat "ta2"   "NP" [Pers,Thrd,Sg,Fem]     []]      -- she/her
 lexicon "ta3"   = [Cat "ta3"   "NP" [Pers,Thrd,Sg,Neutr]   []]      -- it
-lexicon "tamen" = [Cat "tamen" "NP" [Pers,THrd,Pl]         []]      -- they/them
+lexicon "tamen" = [Cat "tamen" "NP" [Pers,Thrd,Pl]         []]      -- they/them
 
 lexicon "woziji"     = [Cat "woziji"    "NP" [Refl,Sg,Fst]        []]       -- myself
 lexicon "womenziji"  = [Cat "womenziji" "NP" [Refl,Pl,Fst]        []]       -- ourselves
@@ -90,19 +90,19 @@ lexicon "ai"       =
      Cat "_"        "TEN" [Yao] [Cat "ai" "VP" [] [],
                                  Cat "_" "NP"  [] []]]   -- love
 lexicon "jingpei"  =
-    [Cat "jingpei"    "VP" []    [Cat "_" "NP" [] []]
+    [Cat "jingpei"    "VP" []    [Cat "_" "NP" [] []],
      Cat "jingpei"    "VP" []    [Cat "_" "TEN" [] [],
                                   Cat "_" "NP"  [] []],
      Cat "_"         "TEN" [Yao] [Cat "jingpei" "VP" [] [],
                                   Cat "_" "NP"  [] []]]   -- admire
 lexicon "bangzhu"  =
-    [Cat "bangzhu"    "VP" []    [Cat "_" "NP" [] []]
+    [Cat "bangzhu"    "VP" []    [Cat "_" "NP" [] []],
      Cat "bangzhu"    "VP" []    [Cat "_" "TEN" [] [],
                                   Cat "_" "NP"  [] []],
      Cat "_"         "TEN" [Yao] [Cat "bangzhu" "VP" [] [],
                                   Cat "_" "NP"  [] []]]   -- help
 lexicon "dabai"  =
-   [Cat "dabai"    "VP" []    [Cat "_" "NP" [] []]
+   [Cat "dabai"    "VP" []    [Cat "_" "NP" [] []],
     Cat "dabai"    "VP" []    [Cat "_" "TEN" [] [],
                                  Cat "_" "NP"  [] []],
     Cat "_"         "TEN" [Yao] [Cat "dabai" "VP" [] [],

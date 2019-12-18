@@ -234,20 +234,17 @@ reaction =  parseManyAs "REACTION" answer
 turn     =  parseAs "TURN" [guess,reaction]
 game     =  turn <|> parseAs "GAME" [turn,game]
 
-gender, number, person, gcase, pronType, tense, prepType
+gender, number, person, pronType, structure, tense, question, exclamation, prepType
          :: Agreement -> Agreement
-gender   = filter (`elem` [MascOrFem,Masc,Fem,Neutr])
+gender   = filter (`elem` [Masc,Fem,Neutr])
 number   = filter (`elem` [Sg,Pl])
 person   = filter (`elem` [Fst,Snd,Thrd])
-gcase    = filter (`elem` [Nom,AccOrDat])
-pronType = filter (`elem` [Pers,Refl,Wh])
-tense    = filter (`elem` [Past,Pres,Fut,Perf,Infl])
-prepType = filter (`elem` [On,With,By,To,From])
-
-prune :: Agreement -> Agreement
-prune fs = if   (Masc `elem` fs || Fem `elem` fs)
-           then (delete MascOrFem fs)
-           else fs
+pronType = filter (`elem` [Pers,Refl])
+structure = filter (`elem` [De1,De2,De4])
+tense = filter (`elem` [Le,Zhe,Yao])
+question = filter(`elem` [Ma,Me,Ne,Ba])
+exclamation = filter(`elem` [Ah,Ya,Wa])
+prepType = filter(`elem` [At,With,From,To])
 
 instance Show Cat where
   show (Cat "_"  label agr subcatlist) = label ++ show agr
@@ -268,15 +265,17 @@ subcatList (Cat _ _ _ cats) = cats
 
 combine :: Cat -> Cat -> [Agreement]
 combine cat1 cat2 =
- [ feats | length (gender   feats) <= 1,
-           length (number   feats) <= 1,
-           length (person   feats) <= 1,
-           length (gcase    feats) <= 1,
-           length (pronType feats) <= 1,
-           length (tense    feats) <= 1,
-           length (prepType feats) <= 1 ]
+ [ feats | length (gender      feats) <= 1,
+           length (number      feats) <= 1,
+           length (person      feats) <= 1,
+           length (structure   feats) <= 1,
+           length (pronType    feats) <= 1,
+           length (tense       feats) <= 1,
+           length (question    feats) <= 1,
+           length (exclamation feats) <= 1,
+           length (prepType    feats) <= 1 ]
   where
-    feats = (prune . nub . sort) (fs cat1 ++ fs cat2)
+    feats = (nub . sort) (fs cat1 ++ fs cat2)
 
 agree :: Cat -> Cat -> Bool
 agree cat1 cat2 = not (null (combine cat1 cat2))
@@ -301,18 +300,6 @@ preproc []                 = []
 preproc ["."]              = []
 preproc ["?"]              = []
 preproc (",":xs)           = preproc xs
-
-preproc ("did":"not":xs)   = "didn't" : preproc xs
-preproc ("nothing":xs)     = "no"    : "thing"  : preproc xs
-preproc ("nobody":xs)      = "no"    : "person" : preproc xs
-preproc ("something":xs)   = "some"  : "thing"  : preproc xs
-preproc ("somebody":xs)    = "some"  : "person" : preproc xs
-preproc ("everything":xs)  = "every" : "thing"  : preproc xs
-preproc ("everybody":xs)   = "every" : "person" : preproc xs
-preproc ("less":"than":xs) = "less_than" : preproc xs
-preproc ("more":"than":xs) = "more_than" : preproc xs
-preproc ("at":"least":xs)  = "at_least"  : preproc xs
-preproc ("at":"most":xs)   = "at_most"   : preproc xs
 preproc (x:xs)             = x : preproc xs
 
 lookupWord :: (String -> [Cat]) -> String -> [Cat]
@@ -351,10 +338,9 @@ assignT f (Branch c ts) = [Branch c' ts | c' <- assign f c]
 
 sRule :: PARSER Cat Cat
 sRule = \ xs ->
-       [ (Branch (Cat "_" "S" [] []) [np',vp],zs) |
+       [ (Branch (Cat "_" "S" [] []) [np,vp],zs) |
          (np,ys) <- parseNP xs,
          (vp,zs) <- parseVP ys,
-         np'     <- assignT Nom np,
          agreeC np vp,
          subcatList (t2c vp) == [] ]
 
@@ -374,11 +360,10 @@ parseNP = leafP "NP" <|> npRule
 
 ppRule :: PARSER Cat Cat
 ppRule = \ xs ->
-   [ (Branch (Cat "_" "PP" fs []) [prep,np'],zs) |
+   [ (Branch (Cat "_" "PP" fs []) [prep,np],zs) |
      (prep,ys) <- parsePrep xs,
      (np,zs)   <- parseNP ys,
-      np'      <- assignT AccOrDat np,
-      fs       <- combine (t2c prep) (t2c np') ]
+      fs       <- combine (t2c prep) (t2c np) ]
 
 parsePP :: PARSER Cat Cat
 parsePP = ppRule
@@ -402,7 +387,7 @@ parseAux :: PARSER Cat Cat
 parseAux = leafP "AUX"
 
 parseVP :: PARSER Cat Cat
-parseVP = finPastVpRule <|> finPresVpRule <|> finFutVpRule <|> finPerfVpRule <|> auxVpRule
+parseVP = vpRule
 
 vpRule :: PARSER Cat Cat
 vpRule = \xs ->
@@ -419,29 +404,6 @@ match []      _     = False
 match (x:xs) (y:ys) = catLabel x == catLabel y
             && agree x y
               && match xs ys
-
-finPastVpRule :: PARSER Cat Cat
-finPastVpRule = \xs -> [(vp',ys) | (vp,ys) <- vpRule xs,
-                  vp'    <- assignT Past vp ]
-
-finPresVpRule :: PARSER Cat Cat
-finPresVpRule = \xs -> [(vp',ys) | (vp,ys) <- vpRule xs,
-                  vp'    <- assignT Pres vp ]
-
-finFutVpRule :: PARSER Cat Cat
-finFutVpRule = \xs -> [(vp',ys) | (vp,ys) <- vpRule xs,
-                  vp'    <- assignT Fut vp ]
-
-finPerfVpRule :: PARSER Cat Cat
-finPerfVpRule = \xs -> [(vp',ys) | (vp,ys) <- vpRule xs,
-                  vp'    <- assignT Perf vp ]
-
-auxVpRule :: PARSER Cat Cat
-auxVpRule = \xs ->
- [(Branch (Cat "_" "VP" (fs (t2c aux)) []) [aux,inf'],zs) |
-  (aux,ys) <- parseAux xs,
-  (inf,zs) <- vpRule ys,
-  inf'    <- assignT Infl inf ]
 
 prs :: String -> [ParseTree Cat Cat]
 prs string = let ws = lexer string
@@ -498,10 +460,9 @@ prsS = spR <||> cond1R <||> cond2R
 
 spR :: SPARSER Cat Cat
 spR = \ us xs ->
- [ (Branch (Cat "_" "S" (fs (t2c np)) []) [np',vp],ws,zs) |
+ [ (Branch (Cat "_" "S" (fs (t2c np)) []) [np,vp],ws,zs) |
        (np,vs,ys) <- prsNP us xs,
        (vp,ws,zs) <- prsVP vs ys,
-        np'       <- assignT Nom np,
        agreeC np vp,
        subcatList (t2c vp) == [] ]
 
@@ -538,7 +499,7 @@ prsCN :: SPARSER Cat Cat
 prsCN = leafPS "CN" <||> cnrelR
 
 prsVP :: SPARSER Cat Cat
-prsVP = finPastVpR <||> finPresVpR <||> finFutVpR <||> finPerfVpR <||> auxVpR
+prsVP = vpR
 
 vpR :: SPARSER Cat Cat
 vpR = \us xs ->
@@ -548,30 +509,6 @@ vpR = \us xs ->
              (xps,ws,zs) <- prsNPsorPPs vs ys,
              match subcatlist (map t2c xps) ]
 
-finPastVpR :: SPARSER Cat Cat
-finPastVpR = \us xs -> [(vp',vs,ys) | (vp,vs,ys) <- vpR us xs,
-                                   vp' <- assignT Past vp ]
-
-finPresVpR :: SPARSER Cat Cat
-finPresVpR = \us xs -> [(vp',vs,ys) | (vp,vs,ys) <- vpR us xs,
-                                   vp' <- assignT Pres vp ]
-
-finFutVpR :: SPARSER Cat Cat
-finFutVpR = \us xs -> [(vp',vs,ys) | (vp,vs,ys) <- vpR us xs,
-                                   vp' <- assignT Fut vp ]
-
-finPerfVpR :: SPARSER Cat Cat
-finPerfVpR = \us xs -> [(vp',vs,ys) | (vp,vs,ys) <- vpR us xs,
-                                   vp' <- assignT Perf vp ]
-
-auxVpR :: SPARSER Cat Cat
-auxVpR = \us xs ->
-     [ (Branch (Cat "_" "VP" (fs (t2c aux)) [])
-               [aux,inf'], ws, zs) |
-                 (aux,vs,ys) <- prsAUX us xs,
-                 (inf,ws,zs) <- vpR vs ys,
-                  inf'       <- assignT Infl inf ]
-
 prsAUX :: SPARSER Cat Cat
 prsAUX = leafPS "AUX" <||> pop "AUX"
 
@@ -580,11 +517,10 @@ prsPP = ppR <||> pop "PP"
 
 ppR :: SPARSER Cat Cat
 ppR = \us xs ->
-  [ (Branch (Cat "_" "PP" fs []) [prep,np'], ws, zs) |
+  [ (Branch (Cat "_" "PP" fs []) [prep,np], ws, zs) |
       (prep,vs,ys) <- prsPREP us xs,
       (np,ws,zs)   <- prsNP vs ys,
-       np'         <- assignT AccOrDat np,
-       fs          <- combine (t2c prep) (t2c np') ]
+       fs          <- combine (t2c prep) (t2c np) ]
 
 prsPREP :: SPARSER Cat Cat
 prsPREP = leafPS "PREP"
@@ -618,9 +554,8 @@ relclauseR = \us xs ->
 thatlessR :: SPARSER Cat Cat
 thatlessR = \ us xs ->
         [ (Branch (Cat "_" "COMP" [] []) [s], vs, ys) |
-           gap       <- [Cat "#" "NP" [AccOrDat] []],
-           (s,vs,ys) <- push gap prsS us xs,
-           notElem Wh (fs (t2c s))                       ]
+           gap       <- [Cat "#" "NP" [] []],
+           (s,vs,ys) <- push gap prsS us xs]
 
 prsYN :: SPARSER Cat Cat
 prsYN = \us xs ->
@@ -629,24 +564,11 @@ prsYN = \us xs ->
        gap         <- [Cat "#" "AUX" (fs (t2c aux)) [] ],
        (s,ws,zs)   <- push gap prsS vs ys ]
 
-isWH :: ParseTree Cat Cat -> Bool
-isWH tr = Wh `elem` (fs (t2c tr))
-
-prsWH :: SPARSER Cat Cat
-prsWH = \us xs ->
-   [ (Branch (Cat "_" "WH" [] []) [wh,yn], ws,zs) |
-       (wh,vs,ys) <- prsNPorPP us xs,
-       isWH wh,
-       gapfs      <- [filter (/= Wh) (fs (t2c wh))],
-       gap        <- [Cat "#" (catLabel (t2c wh)) gapfs []],
-       (yn,ws,zs) <- push gap prsYN vs ys ]
-
 parses :: String -> [ParseTree Cat Cat]
 parses str = let ws = lexer str
              in  [ s | catlist   <- collectCats lexicon ws,
                        (s,[],[]) <- prsTXT [] catlist
-                                 ++ prsYN  [] catlist
-                                 ++ prsWH  [] catlist ]
+                                 ++ prsYN  [] catlist]
 
 testSuite1 :: [String]
 testSuite1 =
@@ -825,13 +747,11 @@ transW (Branch (Cat _ "NP" fs _) [det,cn]) =
 transW (Leaf (Cat _ "NP" fs _))
       | Masc      `elem` fs = Rel "man"    [Var 0]
       | Fem       `elem` fs = Rel "woman"  [Var 0]
-      | MascOrFem `elem` fs = Rel "person" [Var 0]
       | otherwise           = Rel "thing"  [Var 0]
 
 transW (Branch (Cat _ "PP" fs _) [prep,np])
       | Masc      `elem` fs = Rel "man"    [Var 0]
       | Fem       `elem` fs = Rel "woman"  [Var 0]
-      | MascOrFem `elem` fs = Rel "person" [Var 0]
       | otherwise           = Rel "thing"  [Var 0]
 
 subst :: Term -> Term -> Term
