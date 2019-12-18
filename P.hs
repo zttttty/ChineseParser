@@ -241,7 +241,7 @@ number   = filter (`elem` [Sg,Pl])
 person   = filter (`elem` [Fst,Snd,Thrd])
 pronType = filter (`elem` [Pers,Refl])
 structure = filter (`elem` [De1,De2,De4])
-tense = filter (`elem` [Le,Zhe,Yao])
+tense = filter (`elem` [Past,PresCon,Fut])
 question = filter(`elem` [Ma,Me,Ne,Ba])
 exclamation = filter(`elem` [Ah,Ya,Wa])
 prepType = filter(`elem` [At,With,From,To])
@@ -400,17 +400,20 @@ vpRule = \xs ->
    (xps,zs)    <- parseNPsorPPs ys,
    match subcatlist (map t2c xps) ]
 
-tenVpRule1 :: PARSER Cat Cat
+tenVpRule1 :: PARSER Cat Cat    -- yao + verb --> Future
 tenVpRule1 = \xs ->
-    [ (Branch (Cat "_" "VP" (fs (t2c ten)) []) [ten,inf],zs) |
+    [ (Branch (Cat "_" "VP" (fs (t2c ten)) []) [ten,vp],zs) |
     (ten,ys) <- parseTen xs,
-    (inf,zs) <- vpRule ys]
+    (vp,zs) <- vpRule ys]
 
-tenVpRule2 :: PARSER Cat Cat
+tenVpRule2 :: PARSER Cat Cat  -- verb + le/zhe --> Past/ PresCon
 tenVpRule2 = \xs ->
-    [ (Branch (Cat "_" "VP" (fs (t2c ten)) []) [inf,ten],zs) |
-    (inf,ys) <- vpRule xs,
-    (ten,zs) <- parseTen ys]
+    [ (Branch (Cat "_" "VP" (fs (t2c ten)) []) (vp:(ten:xps)),ws) |
+    (vp,ys) <- leafP "VP" xs,
+    subcatlist  <- [subcatList (t2c vp)],
+    (ten,zs) <- parseTen ys,
+    (xps,ws)    <- parseNPsorPPs zs,
+    match subcatlist (map t2c xps) ]
 
 auxVpRule :: PARSER Cat Cat
 auxVpRule = \xs ->
