@@ -386,8 +386,11 @@ parsePrep = leafP "PREP"
 parseAux :: PARSER Cat Cat
 parseAux = leafP "AUX"
 
+parseTen :: PARSER Cat Cat
+parseTen = leafP "TEN"
+
 parseVP :: PARSER Cat Cat
-parseVP = vpRule
+parseVP = vpRule <|> tenVpRule1 <|> tenVpRule2
 
 vpRule :: PARSER Cat Cat
 vpRule = \xs ->
@@ -396,6 +399,24 @@ vpRule = \xs ->
    subcatlist  <- [subcatList (t2c vp)],
    (xps,zs)    <- parseNPsorPPs ys,
    match subcatlist (map t2c xps) ]
+
+tenVpRule1 :: PARSER Cat Cat
+tenVpRule1 = \xs ->
+    [ (Branch (Cat "_" "VP" (fs (t2c ten)) []) [ten,inf],zs) |
+    (ten,ys) <- parseTen xs,
+    (inf,zs) <- vpRule ys]
+
+tenVpRule2 :: PARSER Cat Cat
+tenVpRule2 = \xs ->
+    [ (Branch (Cat "_" "VP" (fs (t2c ten)) []) [inf,ten],zs) |
+    (inf,ys) <- vpRule xs,
+    (ten,zs) <- parseTen ys]
+
+auxVpRule :: PARSER Cat Cat
+auxVpRule = \xs ->
+    [(Branch (Cat "_" "VP" (fs (t2c aux)) []) [aux,inf],zs) |
+    (aux,ys) <- parseAux xs,
+    (inf,zs) <- vpRule ys]
 
 match :: [Cat] -> [Cat] -> Bool
 match []     []     = True
