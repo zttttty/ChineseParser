@@ -333,13 +333,19 @@ assignT f (Leaf   c)    = [Leaf   c'    | c' <- assign f c]
 assignT f (Branch c ts) = [Branch c' ts | c' <- assign f c]
 
 parseSent :: PARSER Cat Cat
-parseSent = sRule <|> exclsRule
+parseSent = sRule <|> exclSRule <|> qSRule
 
-exclsRule :: PARSER Cat Cat
-exclsRule = \ xs ->
+exclSRule :: PARSER Cat Cat
+exclSRule = \ xs ->
        [ (Branch (Cat "_" "S" [] []) [s,mak],zs) |
-         (s,ys) <- parseSent xs,
-         (mak, zs) <- leafP "MAK" ys]
+         (s,ys) <- sRule xs,
+         (mak, zs) <- leafP "EMAK" ys]
+
+qSRule :: PARSER Cat Cat
+qSRule = \ xs ->
+       [ (Branch (Cat "_" "S" [] []) [s,mak],zs) |
+         (s,ys) <- sRule xs,
+         (mak, zs) <- leafP "QMAK" ys]
 
 sRule :: PARSER Cat Cat
 sRule = \ xs ->
