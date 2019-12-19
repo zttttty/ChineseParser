@@ -377,10 +377,29 @@ parseTen :: PARSER Cat Cat
 parseTen = leafP "TEN"
 
 parseVP :: PARSER Cat Cat
-parseVP = vpRule <|> ppvpRule
+parseVP = vpRule <|> futVpRule
 
+futVpRule :: PARSER Cat Cat    -- yao + verb --> Future
+futVpRule = \xs ->
+    [ (Branch (Cat "_" "VP" (fs (t2c ten)) []) [ten,vp],zs) |
+      (ten,ys) <- parseTen xs,
+      (vp,zs) <- vpRule ys]
+
+vpRule :: PARSER Cat Cat
+vpRule = \xs ->
+    [(Branch (Cat "_" "VP" (fs (t2c vp)) []) [vp],ys) |
+      (vp,ys)  <- parsePPVP xs]
+      
 parseV'P :: PARSER Cat Cat
-parseV'P = vpRule2 <|> tenVpRule2 -- vpRule <|> futVpRule <|> ppvpRule
+parseV'P = vpBasicRule <|> tenVpRule -- vpRule <|> futVpRule <|> ppvpRule
+
+parsePPVP :: PARSER Cat Cat
+parsePPVP = ppvpRule <|> neatvpRule
+
+neatvpRule :: PARSER Cat Cat
+neatvpRule = \xs ->
+  [(Branch (Cat "_" "VP" (fs (t2c vp)) []) [vp],ys) |
+   (vp,ys)  <- parseV'P xs]
 
 ppvpRule :: PARSER Cat Cat
 ppvpRule = \xs ->
@@ -388,29 +407,25 @@ ppvpRule = \xs ->
    (pp,ys)  <- parsePP xs,
    (vp,zs)  <- parseV'P ys]
 
-vpRule :: PARSER Cat Cat
-vpRule = \xs ->
-    [(Branch (Cat "_" "VP" (fs (t2c vp)) []) [vp],ys) |
-    (vp,ys)  <- parseV'P xs]
 
-vpRule2 :: PARSER Cat Cat
-vpRule2 = \xs ->
-     [ (Branch (Cat "_" "VP" (fs (t2c vp)) []) [vp,np],zs) |
+
+
+vpBasicRule :: PARSER Cat Cat
+vpBasicRule = \xs ->
+     [ (Branch (Cat "_" "VP" (fs (t2c vp)) []) (vp:nps),zs) |
        (vp,ys)     <- leafP "VP" xs,
-       (np,zs)    <- parseNP ys]
+       subcatlist  <- [subcatList (t2c vp)],
+       (nps,zs)    <- parseNPs ys,
+       match subcatlist (map t2c nps)]
 
-tenVpRule2 :: PARSER Cat Cat  -- verb + le/zhe --> Past/ PresCon
-tenVpRule2 = \xs ->
-    [ (Branch (Cat "_" "VP" (fs (t2c ten)) []) [vp,ten,np],ws) |
+tenVpRule :: PARSER Cat Cat  -- verb + le/zhe --> Past/ PresCon
+tenVpRule = \xs ->
+    [ (Branch (Cat "_" "VP" (fs (t2c ten)) []) (vp:(ten:nps)),ws) |
     (vp,ys) <- leafP "VP" xs,
     (ten,zs) <- parseTen ys,
-    (np,ws)    <- parseNP zs]
-
-futVpRule :: PARSER Cat Cat    -- yao + verb --> Future
-futVpRule = \xs ->
-        [ (Branch (Cat "_" "VP" (fs (t2c ten)) []) [ten,vp],zs) |
-        (ten,ys) <- parseTen xs,
-        (vp,zs) <- vpRule ys]
+    subcatlist  <- [subcatList (t2c vp)],
+    (nps,ws)    <- parseNPs zs,
+    match subcatlist (map t2c nps)]
 
 match :: [Cat] -> [Cat] -> Bool
 match []     []     = True
@@ -419,6 +434,9 @@ match []      _     = False
 match (x:xs) (y:ys) = catLabel x == catLabel y
             && agree x y
               && match xs ys
+
+parseNPs :: [Cat] -> [([ParseTree Cat Cat],[Cat])]
+parseNPs = many parseNP
 
 prs :: String -> [ParseTree Cat Cat]
 prs string = let ws = lexer string
