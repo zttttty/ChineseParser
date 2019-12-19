@@ -332,6 +332,15 @@ assignT :: Feat ->  ParseTree Cat Cat
 assignT f (Leaf   c)    = [Leaf   c'    | c' <- assign f c]
 assignT f (Branch c ts) = [Branch c' ts | c' <- assign f c]
 
+parseSent :: PARSER Cat Cat
+parseSent = sRule <|> exclsRule
+
+exclsRule :: PARSER Cat Cat
+exclsRule = \ xs ->
+       [ (Branch (Cat "_" "S" [] []) [s,mak],zs) |
+         (s,ys) <- parseSent xs,
+         (mak, zs) <- leafP "MAK" ys]
+
 sRule :: PARSER Cat Cat
 sRule = \ xs ->
        [ (Branch (Cat "_" "S" [] []) [np,vp],zs) |
@@ -339,9 +348,6 @@ sRule = \ xs ->
          (vp,zs) <- parseVP ys,
          agreeC np vp,
          subcatList (t2c vp) == [] ]
-
-parseSent :: PARSER Cat Cat
-parseSent = sRule
 
 npRule :: PARSER Cat Cat
 npRule = \ xs ->
@@ -370,9 +376,6 @@ parseDET = leafP "DET"
 parsePrep :: PARSER Cat Cat
 parsePrep = leafP "PREP"
 
-parseAux :: PARSER Cat Cat
-parseAux = leafP "AUX"
-
 parseTen :: PARSER Cat Cat
 parseTen = leafP "TEN"
 
@@ -389,7 +392,7 @@ vpRule :: PARSER Cat Cat
 vpRule = \xs ->
     [(Branch (Cat "_" "VP" (fs (t2c vp)) []) [vp],ys) |
       (vp,ys)  <- parsePPVP xs]
-      
+
 parseV'P :: PARSER Cat Cat
 parseV'P = vpBasicRule <|> tenVpRule -- vpRule <|> futVpRule <|> ppvpRule
 

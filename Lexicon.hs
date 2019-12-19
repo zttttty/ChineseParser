@@ -110,13 +110,13 @@ lexicon "le"    = [Cat "le"      "TEN"  [Past] []]  -- tense particles
 lexicon "zhe"   = [Cat "zhe"     "TEN"  [PresCon]  []]
 lexicon "yao"   = [Cat "yao"     "TEN"  [Fut]  []]
 
-lexicon "ma"    = [Cat "ma"      "MAK"  [Ma]   []]  -- question markers
-lexicon "me"    = [Cat "me"      "MAK"  [Me]   []]
-lexicon "ne"    = [Cat "ne"      "MAK"  [Ne]   []]
-lexicon "ba"    = [Cat "ba"      "MAK"  [Ba]   []]
+lexicon "ma"    = [Cat "ma"      "QMAK"  [Ma]   []]  -- question markers
+lexicon "me"    = [Cat "me"      "QMAK"  [Me]   []]
+lexicon "ne"    = [Cat "ne"      "QMAK"  [Ne]   []]
+lexicon "ba"    = [Cat "ba"      "QMAK"  [Ba]   []]
 
-lexicon "ah"    = [Cat "ah"      "MAK"  [Ah]   []]  -- exclamation markers
-lexicon "ya"    = [Cat "ya"      "MAK"  [Ya]   []]
-lexicon "wa"    = [Cat "wa"      "MAK"  [Wa]   []]
+lexicon "ah"    = [Cat "ah"      "EMAK"  [Ah]   []]  -- exclamation markers
+lexicon "ya"    = [Cat "ya"      "EMAK"  [Ya]   []]
+lexicon "wa"    = [Cat "wa"      "EMAK"  [Wa]   []]
 
 lexicon _ = []
