@@ -234,12 +234,10 @@ reaction =  parseManyAs "REACTION" answer
 turn     =  parseAs "TURN" [guess,reaction]
 game     =  turn <|> parseAs "GAME" [turn,game]
 
-gender, number, person, pronType, structure, tense, question, exclamation, prepType
+gender, modifier, structure, tense, question, exclamation, prepType
          :: Agreement -> Agreement
 gender   = filter (`elem` [Masc,Fem,Neutr])
-number   = filter (`elem` [Sg,Pl])
-person   = filter (`elem` [Fst,Snd,Thrd])
-pronType = filter (`elem` [Pers,Refl])
+modifier = filter (`elem` [Dfree,Dban])
 structure = filter (`elem` [De1,De2,De4])
 tense = filter (`elem` [Past,PresCon,Fut])
 question = filter(`elem` [Ma,Me,Ne,Ba])
@@ -266,10 +264,8 @@ subcatList (Cat _ _ _ cats) = cats
 combine :: Cat -> Cat -> [Agreement]
 combine cat1 cat2 =
  [ feats | length (gender      feats) <= 1,
-           length (number      feats) <= 1,
-           length (person      feats) <= 1,
-           length (structure   feats) <= 1,
-           length (pronType    feats) <= 1,
+           length (modifier      feats) <= 1,
+           length (structure      feats) <= 1,
            length (tense       feats) <= 1,
            length (question    feats) <= 1,
            length (exclamation feats) <= 1,
@@ -349,11 +345,11 @@ parseSent = sRule
 
 npRule :: PARSER Cat Cat
 npRule = \ xs ->
-  [ (Branch (Cat "_" "NP" fs []) [det,cn],zs) |
+  [ (Branch (Cat "_" "NP" fs []) [det,np],zs) |
     (det,ys) <- parseDET xs,
-    (cn,zs)  <- parseCN  ys,
-    fs       <- combine (t2c det) (t2c cn),
-    agreeC det cn ]
+    (np,zs)  <- leafP "NP"  ys,
+    fs       <- combine (t2c det) (t2c np),
+    agreeC det np ]
 
 parseNP :: PARSER Cat Cat
 parseNP = leafP "NP" <|> npRule
@@ -361,24 +357,15 @@ parseNP = leafP "NP" <|> npRule
 ppRule :: PARSER Cat Cat
 ppRule = \ xs ->
    [ (Branch (Cat "_" "PP" fs []) [prep,np],zs) |
-     (prep,ys) <- parsePrep xs,
+     (prep,ys) <- leafP "PREP" xs,
      (np,zs)   <- parseNP ys,
       fs       <- combine (t2c prep) (t2c np) ]
 
 parsePP :: PARSER Cat Cat
 parsePP = ppRule
 
-parseNPorPP :: PARSER Cat Cat
-parseNPorPP = parseNP <|> parsePP
-
-parseNPsorPPs :: [Cat] -> [([ParseTree Cat Cat],[Cat])]
-parseNPsorPPs = many parseNPorPP
-
 parseDET :: PARSER Cat Cat
 parseDET = leafP "DET"
-
-parseCN :: PARSER Cat Cat
-parseCN = leafP "CN"
 
 parsePrep :: PARSER Cat Cat
 parsePrep = leafP "PREP"
@@ -390,36 +377,40 @@ parseTen :: PARSER Cat Cat
 parseTen = leafP "TEN"
 
 parseVP :: PARSER Cat Cat
-parseVP = vpRule <|> tenVpRule1 <|> tenVpRule2
+parseVP = vpRule <|> ppvpRule
+
+parseV'P :: PARSER Cat Cat
+parseV'P = vpRule2 <|> tenVpRule2 -- vpRule <|> futVpRule <|> ppvpRule
+
+ppvpRule :: PARSER Cat Cat
+ppvpRule = \xs ->
+  [(Branch (Cat "_" "VP" (fs (t2c vp)) []) [pp,vp],zs) |
+   (pp,ys)  <- parsePP xs,
+   (vp,zs)  <- parseV'P ys]
 
 vpRule :: PARSER Cat Cat
 vpRule = \xs ->
- [ (Branch (Cat "_" "VP" (fs (t2c vp)) []) (vp:xps),zs) |
-   (vp,ys)     <- leafP "VP" xs,
-   subcatlist  <- [subcatList (t2c vp)],
-   (xps,zs)    <- parseNPsorPPs ys,
-   match subcatlist (map t2c xps) ]
+    [(Branch (Cat "_" "VP" (fs (t2c vp)) []) [vp],ys) |
+    (vp,ys)  <- parseV'P xs]
 
-tenVpRule1 :: PARSER Cat Cat    -- yao + verb --> Future
-tenVpRule1 = \xs ->
-    [ (Branch (Cat "_" "VP" (fs (t2c ten)) []) [ten,vp],zs) |
-    (ten,ys) <- parseTen xs,
-    (vp,zs) <- vpRule ys]
+vpRule2 :: PARSER Cat Cat
+vpRule2 = \xs ->
+     [ (Branch (Cat "_" "VP" (fs (t2c vp)) []) [vp,np],zs) |
+       (vp,ys)     <- leafP "VP" xs,
+       (np,zs)    <- parseNP ys]
 
 tenVpRule2 :: PARSER Cat Cat  -- verb + le/zhe --> Past/ PresCon
 tenVpRule2 = \xs ->
-    [ (Branch (Cat "_" "VP" (fs (t2c ten)) []) (vp:(ten:xps)),ws) |
+    [ (Branch (Cat "_" "VP" (fs (t2c ten)) []) [vp,ten,np],ws) |
     (vp,ys) <- leafP "VP" xs,
-    subcatlist  <- [subcatList (t2c vp)],
     (ten,zs) <- parseTen ys,
-    (xps,ws)    <- parseNPsorPPs zs,
-    match subcatlist (map t2c xps) ]
+    (np,ws)    <- parseNP zs]
 
-auxVpRule :: PARSER Cat Cat
-auxVpRule = \xs ->
-    [(Branch (Cat "_" "VP" (fs (t2c aux)) []) [aux,inf],zs) |
-    (aux,ys) <- parseAux xs,
-    (inf,zs) <- vpRule ys]
+futVpRule :: PARSER Cat Cat    -- yao + verb --> Future
+futVpRule = \xs ->
+        [ (Branch (Cat "_" "VP" (fs (t2c ten)) []) [ten,vp],zs) |
+        (ten,ys) <- parseTen xs,
+        (vp,zs) <- vpRule ys]
 
 match :: [Cat] -> [Cat] -> Bool
 match []     []     = True

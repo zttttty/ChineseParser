@@ -9,9 +9,7 @@ data Cat      = Cat Phon CatLabel Agreement [Cat]
 type Agreement = [Feat]
 
 data Feat = Masc  | Fem  | Neutr
-            | Sg    | Pl
-            | Fst   | Snd  | Thrd
-            | Pers  | Refl
+            | Dfree | Dban                                -- Det marker (Dfree: NP can be modified by Det, vice versa)
             | De1 |  De2 |  De4                           -- structure particles
             | Past  |  PresCon  |  Fut                    -- tense (past, present continuous, future)
             | Ma  |  Me  |  Ne  |  Ba                     -- question markers
@@ -21,105 +19,88 @@ data Feat = Masc  | Fem  | Neutr
 
 lexicon :: String -> [Cat]
 
-lexicon "wo"    = [Cat "wo"    "NP" [Pers,Fst,Sg]          []]      -- i/me 我
-lexicon "women" = [Cat "women" "NP" [Pers,Fst,Pl]          []]      -- we/us 我们
-lexicon "ni"    = [Cat "ni"    "NP" [Pers,Snd]             []]      -- you 你
-lexicon "ta1"   = [Cat "ta1"   "NP" [Pers,Thrd,Sg,Masc]    []]      -- he/him 他
-lexicon "ta2"   = [Cat "ta2"   "NP" [Pers,Thrd,Sg,Fem]     []]      -- she/her 她
-lexicon "ta3"   = [Cat "ta3"   "NP" [Pers,Thrd,Sg,Neutr]   []]      -- it 它
-lexicon "tamen1" = [Cat "tamen1" "NP" [Pers,Thrd,Pl]       []]      -- they/them (general animate)他们
-lexicon "tamen2" = [Cat "tamen2" "NP" [Pers,Thrd,Pl,Fem]   []]      -- they/them (only fem) 她们
-lexicon "tamen3" = [Cat "tamen3" "NP" [Pers,Thrd,Pl,Neutr] []]      -- they/them (only inanimate)它们
+lexicon "wo"    = [Cat "wo"       "NP" [Dban]         []]      -- i/me 我
+lexicon "women" = [Cat "women"    "NP" [Dban]         []]      -- we/us 我们
+lexicon "ni"    = [Cat "ni"       "NP" [Dban]         []]      -- you 你
+lexicon "ta1"   = [Cat "ta1"      "NP" [Masc,Dban]    []]      -- he/him 他
+lexicon "ta2"   = [Cat "ta2"      "NP" [Fem,Dban]     []]      -- she/her 她
+lexicon "ta3"   = [Cat "ta3"      "NP" [Neutr,Dban]   []]      -- it 它
+lexicon "tamen1" = [Cat "tamen1"  "NP" [Dban]         []]      -- they/them (general animate)他们
+lexicon "tamen2" = [Cat "tamen2"  "NP" [Fem,Dban]     []]      -- they/them (only fem) 她们
+lexicon "tamen3" = [Cat "tamen3"  "NP" [Neutr,Dban]   []]      -- they/them (only inanimate)它们
 
-lexicon "woziji"     = [Cat "woziji"    "NP" [Refl,Sg,Fst]        []]       -- myself 我自己
-lexicon "womenziji"  = [Cat "womenziji" "NP" [Refl,Pl,Fst]        []]       -- ourselves 我们自己
-lexicon "niziji"     = [Cat "niziji"    "NP" [Refl,Sg,Snd]        []]       -- yourself 你自己
-lexicon "nimenziji"  = [Cat "nimenziji" "NP" [Refl,Pl,Snd]        []]       -- yourselves 你们自己
-lexicon "ta1ziji"    = [Cat "ta1ziji"   "NP" [Refl,Sg,Thrd,Masc]  []]       -- himself 他自己
-lexicon "ta2ziji"    = [Cat "ta2ziji"   "NP" [Refl,Sg,Thrd,Fem]   []]       -- herself 她自己
-lexicon "ta3ziji"    = [Cat "ta3ziji"   "NP" [Refl,Sg,Thrd,Neutr] []]       -- itself 它自己
-lexicon "tamenziji"  = [Cat "tamenziji" "NP" [Refl,Pl,Thrd]       []]       -- themselves (general animate) 他们自己
-lexicon "tamenziji2" = [Cat "tamenziji2" "NP" [Refl,Pl,Thrd,Fem]  []]       -- themselves (only fem) 她们自己
-lexicon "tamenziji3" = [Cat "tamenziji3" "NP" [Refl,Pl,Thrd,Neutr][]]       -- themselves (only inanimate)它们自己
+lexicon "taziji1"  = [Cat "taziji1"    "NP" [Masc,Dban]        []]       -- himself 他自己
+lexicon "taziji2"  = [Cat "taziji2"    "NP" [Fem,Dban]         []]       -- herself 她自己
+lexicon "taziji3"  = [Cat "taziji3"    "NP" [Neutr,Dban]       []]       -- itself 它自己
 
-lexicon "baixuegongzhu"  = [Cat "baixuegongzhu"  "NP" [Thrd,Fem,Sg]  []]    -- snowwhite 白雪公主
-lexicon "ailisi"         = [Cat "ailisi"         "NP" [Thrd,Fem,Sg]  []]    -- alice 爱丽斯
-lexicon "duoluoxi"       = [Cat "duoluoxi"       "NP" [Thrd,Fem,Sg]  []]    -- dorothy 多萝西
-lexicon "jinfaguniang"   = [Cat "jinfaguniang"   "NP" [Thrd,Fem,Sg]  []]    -- goldilocks 金发姑娘
-lexicon "xioamuke"       = [Cat "xiaomuke"       "NP" [Thrd,Masc,Sg] []]    -- littlemook 小穆克
-lexicon "ateleiyou"      = [Cat "ateleiyou"      "NP" [Thrd,Masc,Sg] []]    -- atreyu 阿特雷尤
+lexicon "baixuegongzhu"  = [Cat "baixuegongzhu"  "NP" [Fem,Dfree]  []]    -- snowwhite 白雪公主
+lexicon "ailisi"         = [Cat "ailisi"         "NP" [Fem,Dfree]  []]    -- alice 爱丽斯
+lexicon "duoluoxi"       = [Cat "duoluoxi"       "NP" [Fem,Dfree]  []]    -- dorothy 多萝西
+lexicon "jinfaguniang"   = [Cat "jinfaguniang"   "NP" [Fem,Dfree]  []]    -- goldilocks 金发姑娘
+lexicon "xioamuke"       = [Cat "xiaomuke"       "NP" [Masc,Dfree] []]    -- littlemook 小穆克
+lexicon "ateleiyou"      = [Cat "ateleiyou"      "NP" [Masc,Dfree] []]    -- atreyu 阿特雷尤
 
-lexicon "meige"      = [Cat "meige"     "DET" [Sg] []]      -- every 每个
-lexicon "suoyou"     = [Cat "suoyou"    "DET" [Pl] []]      -- all 所有
-lexicon "yixie"      = [Cat "yixie"     "DET" [Pl] []]      -- some 一些
-lexicon "yige"       = [Cat "yige"      "DET" [Sg] []]      -- a 一个
-lexicon "meiyou"     = [Cat "meiyou"    "DET" []   []]      -- no 没有
-lexicon "dabufen"    = [Cat "dabufen"   "DET" [Pl] []]      -- most 大部分
-lexicon "henduo"     = [Cat "henduo"    "DET" [Pl] []]      -- many 很多
-lexicon "henshao"    = [Cat "henshao"   "DET" [Pl] []]      -- few 很少
-lexicon "zhege"      = [Cat "zhege"     "DET" [Sg] []]      -- this 这个
-lexicon "nage"       = [Cat "nage"      "DET" [Sg] []]      -- that 那个
-lexicon "zhexie"     = [Cat "zhexie"    "DET" [Pl] []]      -- these 这些
-lexicon "naxie"      = [Cat "naxie"     "DET" [Pl] []]      -- those 那些
+lexicon "meige"      = [Cat "meige"     "DET" [Dfree] []]      -- every 每个
+lexicon "suoyou"     = [Cat "suoyou"    "DET" [Dfree] []]      -- all 所有
+lexicon "yixie"      = [Cat "yixie"     "DET" [Dfree] []]      -- some 一些
+lexicon "yige"       = [Cat "yige"      "DET" [Dfree] []]      -- a 一个
+lexicon "meiyou"     = [Cat "meiyou"    "DET" [Dfree] []]      -- no 没有
+lexicon "henduo"     = [Cat "henduo"    "DET" [Dfree] []]      -- many 很多
+lexicon "henshao"    = [Cat "henshao"   "DET" [Dfree] []]      -- few 很少
+lexicon "zhege"      = [Cat "zhege"     "DET" [Dfree] []]      -- this 这个
+lexicon "zhexie"     = [Cat "zhexie"    "DET" [Dfree] []]      -- these 这些
 
-lexicon "dongxi"        = [Cat "dongxi"     "CN" [Neutr,Thrd]     []]   -- thing 东西
-lexicon "ren"           = [Cat "ren"        "CN" [Masc,Thrd]      []]   -- person 人
-lexicon "nanhai"        = [Cat "nanhai"     "CN" [Masc,Thrd]      []]   -- boy 男孩
-lexicon "nanhaimen"     = [Cat "nanhaimen"  "CN" [Pl,Masc,Thrd]   []]   -- boys 男孩们
-lexicon "nanren"        = [Cat "nanren"     "CN" [Sg,Masc,Thrd]   []]   -- man 男人
-lexicon "nanrenmen"     = [Cat "nanrenmen"  "CN" [Pl,Masc,Thrd]   []]   -- men 男人们
-lexicon "nvhai"         = [Cat "nvhai"      "CN" [Sg,Fem,Thrd]    []]   -- girl 女孩
-lexicon "nvhaimen"      = [Cat "nvhaimen"   "CN" [Pl,Fem,Thrd]    []]   -- girls 女孩们
-lexicon "nvren"         = [Cat "nvren"      "CN" [Sg,Fem,Thrd]    []]   -- woman 女人
-lexicon "nvrenmen"      = [Cat "nvrenmen"   "CN" [Pl,Fem,Thrd]    []]   -- women 女人们
-lexicon "gongzhu"       = [Cat "gongzhu"    "CN" [Sg,Fem,Thrd]    []]   -- princess 公主
-lexicon "gongzhumen"    = [Cat "gongzhumen" "CN" [Pl,Fem,Thrd]    []]   -- princesses 公主们
-lexicon "xiaoairen"     = [Cat "xiaoairen"    "CN" [Sg,Masc,Thrd] []]   -- dwarf 小矮人
-lexicon "xiaoairenmen"  = [Cat "xiaoairenmen" "CN" [Pl,Masc,Thrd] []]   -- dwarves 小矮人们
-lexicon "juren"         = [Cat "juren"      "CN" [Sg,Masc,Thrd]   []]   -- giant 巨人
-lexicon "jurenmen"      = [Cat "jurenmen"   "CN" [Pl,Masc,Thrd]   []]   -- giants 巨人们
+lexicon "ren"           = [Cat "ren"        "NP" [Dfree]           []]   -- person 人
+lexicon "nanhai"        = [Cat "nanhai"     "NP" [Masc,Dfree]      []]   -- boy 男孩
+lexicon "nanhaimen"     = [Cat "nanhaimen"  "NP" [Masc,Dban]       []]   -- boys 男孩们
+lexicon "nvhai"         = [Cat "nvhai"      "NP" [Fem,Dfree]       []]   -- girl 女孩
+lexicon "nvhaimen"      = [Cat "nvhaimen"   "NP" [Fem,Dban]        []]   -- girls 女孩们
+lexicon "gongzhu"       = [Cat "gongzhu"    "NP" [Fem,Dfree]       []]   -- princess 公主
+lexicon "gongzhumen"    = [Cat "gongzhumen" "NP" [Fem,Dban]        []]   -- princesses 公主们
+lexicon "juren"         = [Cat "juren"      "NP" [Masc,Dfree]      []]   -- giant 巨人
+lexicon "jurenmen"      = [Cat "jurenmen"   "NP" [Masc,Dban]       []]   -- giants 巨人们
 
-lexicon "wushi"    = [Cat "wushi"    "CN" [Sg,Masc,Thrd]  []]  -- wizard 巫师
-lexicon "wushimen" = [Cat "wushimen" "CN" [Pl,Masc,Thrd]  []]  -- wizards 巫师们
-lexicon "jian"     = [Cat "jian"     "CN" [Neutr,Thrd]    []]  -- sword/sowrds 剑
-lexicon "dao"      = [Cat "dao"      "CN" [Neutr,Thrd]    []]  -- dagger/daggers 刀
+lexicon "jian"        = [Cat "jian"        "NP" [Neutr,Dfree]    []]  -- sword/sowrds 剑
+lexicon "dao"         = [Cat "dao"         "NP" [Neutr,Dfree]    []]  -- dagger/daggers 刀
+lexicon "tuoxie"      = [Cat "tuoxie"      "NP" [Neutr,Dfree]    []]  -- slipper 拖鞋
+lexicon "ziliao"      = [Cat "ziliao"      "NP" [Neutr,Dfree]    []]  -- resourse 资料
+lexicon "pingguo"     = [Cat "pingguo"     "NP" [Neutr,Dfree]    []]  -- apple 苹果
+lexicon "diannao"     = [Cat "diannao"     "NP" [Neutr,Dfree]    []]  -- computer 电脑
 
 lexicon "weixiao"        = [Cat "weixiao"        "VP" []       []]   -- smile 微笑
+
 lexicon "xiao"           = [Cat "xiao"           "VP" []       []]   -- laugh 笑
+
 lexicon "shuijiao"       = [Cat "shuijiao"       "VP" []       []]   -- sleep 睡觉
 
 lexicon "ai"       =
     [Cat "ai"       "VP"  []    [Cat "_" "NP"  [] []]]   -- love 爱
 
 lexicon "jingpei"  =
-    [Cat "jingpei"    "VP" []    [Cat "_" "NP" [] []]]   -- admire 敬佩
+    [Cat "jingpei"  "VP" []    [Cat "_" "NP" [] []]]   -- admire 敬佩
 
 lexicon "bangzhu"  =
-    [Cat "bangzhu"    "VP" []    [Cat "_" "NP" [] []]]   -- help 帮助
+    [Cat "bangzhu"  "VP" []    [Cat "_" "NP" [] []]]   -- help 帮助
 
-lexicon "dabai"  =
-   [Cat "dabai"    "VP" []    [Cat "_" "NP" [] []]]   -- defeat 打败
+lexicon "dabai"    =
+    [Cat "dabai"    "VP" []    [Cat "_" "NP" [] []]]   -- defeat 打败
 
-lexicon "gei"  =
-    [Cat "gei"     "VP" []      [Cat "_" "NP"    [] [],      -- give 给
-                                 Cat "_" "NP"    [] []]]
-lexicon "mai1"  =
-    [Cat "_"       "PP" [From]  [Cat "mai1" "VP" [] [],      -- buy 买
-                                 Cat "_" "NP"    [] []]]
-lexicon "mai2"  =
-    [Cat "mai2"    "VP" [To]    [Cat "_" "NP"    [] [],      -- sell
-                                 Cat "_" "PP"    [] []]]
+lexicon "chazhao"  =
+    [Cat "chazhao"  "VP" []    [Cat "_" "NP"  [] []]]   -- search 查找
+
+lexicon "mai"  =
+    [Cat "mai"      "VP" []    [Cat "_" "NP"    [] []]]  -- sell 卖
+
 lexicon "ti"    =
-    [Cat "_"      "VP" []  [Cat "_" "NP"    [] []],
-     Cat "_"      "VP" [With]  [Cat "_" "NP"    [] []]]
-     
-lexicon "na"    =
-    [Cat "_"       "PP" [From]  [Cat "na" "VP"   [] [],      -- take
-                                 Cat "_" "NP"    [] []]]
+    [Cat "ti"      "VP" []     [Cat "_" "NP"    [] []]]  -- kick 踢
 
-lexicon "yong"  = [Cat "yong"    "PREP" [With] []]  -- with
-lexicon "xiang" = [Cat "xiang"   "PREP" [To]   []]  -- to
-lexicon "cong"  = [Cat "cong"    "PREP" [From] []]  -- from
+lexicon "na"    =
+    [Cat "na"      "VP" []     [Cat "_" "NP"    [] []]]  -- take 拿
+
+lexicon "yong"  = [Cat "yong"    "PREP" [With] [Cat "ti"      "VP"    [] []]]    -- with 用
+
+lexicon "xiang" = [Cat "xiang"   "PREP" [To]   [Cat "mai"      "VP"    [] []]]    -- to 从
+lexicon "cong"  = [Cat "cong"    "PREP" [From] [Cat "na"       "VP"    [] []]]    -- from 向
 
 lexicon "de1"   = [Cat "de1"     "STRU" [De1]  []]  -- structure particles
 lexicon "de2"   = [Cat "de2"     "STRU" [De2]  []]
